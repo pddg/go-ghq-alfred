@@ -23,6 +23,12 @@ This workflow start with `ghq {query}` in alfred.
 
 Filtering the result of `ghq list -p` with `{query}` and show them.
 
+### Preparing
+
+You should specify path to `ghq`. Open this workflow settings, and edit environment variables. Default is `/usr/local/bin/ghq`.  
+
+And I recommend you to specify a editor and terminal app. Default is `Visual Studio Code.app` and `iTerm.app`
+
 ### Modifier key options
 
 * **Enter**: Open repository in Finder.
