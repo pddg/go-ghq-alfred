@@ -292,7 +292,7 @@ bitbucket logo
 		<string>/usr/local/bin/ghq</string>
 	</dict>
 	<key>version</key>
-	<string>0.1.1</string>
+	<string>0.1.2</string>
 	<key>webaddress</key>
 	<string>https://www.poyo.info/</string>
 </dict>

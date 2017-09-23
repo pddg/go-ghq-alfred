@@ -25,7 +25,7 @@ before_deploy:
   - cp resources/info.plist $TRAVIS_BUILD_DIR/dist/
   - cp -r resources $TRAVIS_BUILD_DIR/dist/
   - cd $TRAVIS_BUILD_DIR/dist
-  - zip ghq-alfred.alfredworkflow ./*
+  - zip -r ghq-alfred.alfredworkflow ./*
 
 deploy:
   provider: releases
