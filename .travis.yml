@@ -1,0 +1,39 @@
+os: osx
+osx_image: xcode9
+
+language: go
+go:
+  - 1.9.x
+
+before_install:
+  - brew update
+  - brew install glide
+
+install:
+  - glide install
+
+script:
+  - go vet -v $(glide novendor)
+  - go test -v $(glide novendor)
+
+before_deploy:
+  - go build
+  - mkdir -p $TRAVIS_BUILD_DIR/dist
+  - mkdir -p $TRAVIS_BUILD_DIR/dist/resources
+  - mv go-ghq-alfred $TRAVIS_BUILD_DIR/dist/
+  - cp resources/icon.png $TRAVIS_BUILD_DIR/dist/
+  - cp resources/info.plist $TRAVIS_BUILD_DIR/dist/
+  - cp resources/*.png $TRAVIS_BUILD_DIR/dist/resources/
+  - cd $TRAVIS_BUILD_DIR/dist
+  - zip ghq-alfred.alfredworkflow ./*
+
+deploy:
+  provider: releases
+  api_key:
+    secure: "MjsAZbMhXdxLXj23ix0bUO3QfNPsqWUoGnnGXT677Z9BOQQf1f9RkYJFjeb9HF2zRmqW8bockXT5FcmYXAtxYAGcFZDHZiUnPASlJn378Eu9zMxbJivY7azf2PoFUzy/8gV2XoXKohsbW/p3yxckj7vBTV1an3SVTVfT9rIhq2zL9i/fYtiHUEQZL7KMBeVX/7Rzucg/tvtPcZWPvoKSVZJgQXT+wY6TpPTc3BovqVsrhtEuqbiLhU8c3/sovzW4N9ibrpdd6RCCuNPu2CqjYCKK8QTajaLZjC8d48U/E/N5CsftYavCCpbfOt3hSKDiqnTVbLEAtChd3qZuXxqnVYGEHlvJRhU2CPajaq7lCPSqQsl1KEMVVbzlb+OC3pYKR8Nc2+8WW4Lkyf73uxC8t9frFLzYsr32ZWZgz25N5z7Kh7uqlje44mOTsK7BQHkdmjauqqyj1C6fqE6oCvFvcWA4i0ZP+W+2IYtd/Xyyrlbq3AFSdiiUQDcIpqgz/3sVQ5+2uYH/hmiSCRC0e45vjrGxTvwcraKf6zzGTzHt0V05kioZbDPsIgaSkQ5TYVKE4EAlqABWj9hlMqZ8D6DlyEBvxUqOLFS4NCbTJOAvUfQOS3FQXxRSdRUnoElqUuW3fXpW6rG0qjv61srPgPnQPivA7qRm4h9IrEXcwcF+mek="
+  file: '$TRAVIS_BUILD_DIR/dist/ghq-alfred.alfredworkflow'
+  skip_cleanup: true
+  on:
+    tags: true
+    repo: pddg/go-ghq-alfred
+    condition: "$TRAVIS_TAG =~ ^v[0-9].*$"

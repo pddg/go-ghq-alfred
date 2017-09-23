@@ -106,7 +106,7 @@
 				<key>runningsubtext</key>
 				<string></string>
 				<key>script</key>
-				<string>./go-alfred-ghq "{query}" $($ghq list -p)</string>
+				<string>./go-ghq-alfred "{query}" $($ghq list -p)</string>
 				<key>scriptargtype</key>
 				<integer>0</integer>
 				<key>scriptfile</key>
