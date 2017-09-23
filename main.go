@@ -64,7 +64,8 @@ func createNoResultItem() *model.Item {
 }
 
 func matchRepo(repo_path []string, query string) bool {
-	if strings.Index(excludeDomain(repo_path, true), query) != -1 {
+	repo_path_lower, query_lower := strings.ToLower(excludeDomain(repo_path, true)), strings.ToLower(query)
+	if strings.Index(repo_path_lower, query_lower) != -1 {
 		return true
 	}
 	return false
