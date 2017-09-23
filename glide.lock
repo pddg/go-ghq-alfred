@@ -1,6 +1,8 @@
-hash: dc251cd599bc843969050cb946f750cd3897252c341f8625845c12911d995c85
-updated: 2017-09-22T14:28:55.011651752+09:00
+hash: b3c1e31fffb57cc25866059e59130f82b1feace0d821869cff8c7b5027730532
+updated: 2017-09-24T00:00:20.527686147+09:00
 imports:
+- name: github.com/pddg/alfred-models
+  version: c0134a4995497951c98842dfb772f7fb283070b4
 - name: github.com/urfave/cli
   version: 7fb9c86b14e6a702a4157ccb5a863f07d844a207
 testImports: []

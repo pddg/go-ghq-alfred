@@ -10,6 +10,7 @@ before_install:
   - brew install glide
 
 install:
+  - glide update
   - glide install
 
 script:
