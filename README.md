@@ -1,5 +1,7 @@
 # go-ghq-alfred
 
+[![Build Status](https://travis-ci.org/pddg/go-ghq-alfred.svg?branch=master)](https://travis-ci.org/pddg/go-ghq-alfred)
+
 Search local repos with ghq in Alfred Workflow.
 
 ## Environment
