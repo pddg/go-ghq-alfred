@@ -23,20 +23,9 @@ func main() {
 		wg := &sync.WaitGroup{}
 		for index, repo := range repos {
 			wg.Add(1)
-			go func(i int, r string) {
-				defer wg.Done()
-				repo_path := strings.Split(r, "/")
-				if matchRepo(repo_path, query) {
-					// Create normal item
-					item := createNewItem(i, r, repo_path)
-					ch <- item
-				}
-			}(index, repo)
+			go worker(index, repo, query, wg, ch)
 		}
-		go func() {
-			wg.Wait()
-			close(ch)
-		}()
+		go waitForWorker(wg, ch)
 		for item := range ch {
 			resp.Items = append(resp.Items, *item)
 		}
@@ -45,7 +34,6 @@ func main() {
 			item := createNoResultItem()
 			resp.Items = append(resp.Items, *item)
 		}
-
 		j, err := json.Marshal(resp)
 		if err != nil {
 			// Json error
@@ -56,6 +44,21 @@ func main() {
 		return nil
 	}
 	app.Run(os.Args)
+}
+
+func waitForWorker(wg *sync.WaitGroup, ch chan *model.Item) {
+	wg.Wait()
+	close(ch)
+}
+
+func worker(index int, repo string, query string, wg *sync.WaitGroup, ch chan *model.Item) {
+	defer wg.Done()
+	path := strings.Split(repo, "/")
+	if matchRepo(path, query) {
+		// Create normal item
+		item := createNewItem(index, repo, path)
+		ch <- item
+	}
 }
 
 func createNewItem(index int, repo string, repo_path []string) *model.Item {
