@@ -7,6 +7,7 @@ import (
 	"github.com/urfave/cli"
 	"os"
 	"strings"
+	"sync"
 )
 
 func main() {
@@ -18,19 +19,33 @@ func main() {
 		resp := model.NewResponse()
 		query := strings.Trim(c.Args()[0], " \n")
 		repos := c.Args()[1:c.NArg()]
+		ch := make(chan *model.Item)
+		wg := &sync.WaitGroup{}
 		for index, repo := range repos {
-			repo_path := strings.Split(repo, "/")
-			if matchRepo(repo_path, query) {
-				// Create normal item
-				item := createNewItem(index, repo, repo_path)
-				resp.Items = append(resp.Items, *item)
-			}
+			wg.Add(1)
+			go func(i int, r string) {
+				defer wg.Done()
+				repo_path := strings.Split(r, "/")
+				if matchRepo(repo_path, query) {
+					// Create normal item
+					item := createNewItem(i, r, repo_path)
+					ch <- item
+				}
+			}(index, repo)
+		}
+		go func() {
+			wg.Wait()
+			close(ch)
+		}()
+		for item := range ch {
+			resp.Items = append(resp.Items, *item)
 		}
 		if resp.Items == nil {
 			// When any item is not found.
 			item := createNoResultItem()
 			resp.Items = append(resp.Items, *item)
 		}
+
 		j, err := json.Marshal(resp)
 		if err != nil {
 			// Json error
