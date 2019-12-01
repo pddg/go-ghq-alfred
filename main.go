@@ -15,7 +15,7 @@ func main() {
 	app := cli.NewApp()
 	app.Name = "ghq-alfred"
 	app.Usage = "Search your local repos"
-	app.Version = "0.3.0"
+	app.Version = "0.3.1"
 	app.Action = func(c *cli.Context) error {
 		resp := model.NewResponse()
 		query := strings.Trim(c.Args()[0], " \n")
