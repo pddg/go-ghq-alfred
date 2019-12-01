@@ -1,93 +1,76 @@
 package main
 
 import (
-	"encoding/json"
-	"fmt"
 	"os"
+	"path"
 	"strings"
-	"sync"
 
-	model "github.com/pddg/alfred-models"
+	aw "github.com/deanishe/awgo"
 	"github.com/urfave/cli"
 )
 
-func main() {
+const (
+	appName    = "ghq-alfred"
+	appDesc    = "Search your local repos"
+	appVersion = "0.3.1"
+)
+
+var (
+	wf            *aw.Workflow
+	gitHubIcon    = &aw.Icon{Value: path.Join("github-logo.png")}
+	bitBucketIcon = &aw.Icon{Value: path.Join("bitbucket-logo.png")}
+	gitIcon       = &aw.Icon{Value: path.Join("git-logo.png")}
+	modKeys       = []aw.ModKey{
+		aw.ModCmd,
+		aw.ModOpt,
+		aw.ModFn,
+		aw.ModCtrl,
+		aw.ModShift,
+	}
+)
+
+func init() {
+	wf = aw.New()
+}
+
+func run() {
 	app := cli.NewApp()
-	app.Name = "ghq-alfred"
-	app.Usage = "Search your local repos"
-	app.Version = "0.3.1"
+	app.Name = appName
+	app.Usage = appDesc
+	app.Version = appVersion
 	app.Action = func(c *cli.Context) error {
-		resp := model.NewResponse()
 		query := strings.Trim(c.Args()[0], " \n")
 		repos := c.Args()[1:c.NArg()]
-		ch := make(chan *model.Item)
-		wg := &sync.WaitGroup{}
-		for index, repo := range repos {
-			wg.Add(1)
-			go worker(index, repo, query, wg, ch)
+		for _, repo := range repos {
+			addNewItem(repo)
 		}
-		go waitForWorker(wg, ch)
-		for item := range ch {
-			resp.Items = append(resp.Items, *item)
+		if len(query) > 0 {
+			wf.Filter(query)
 		}
-		if resp.Items == nil {
-			// When any item is not found.
-			item := createNoResultItem()
-			resp.Items = append(resp.Items, *item)
-		}
-		j, err := json.Marshal(resp)
-		if err != nil {
-			// Json error
-			fmt.Println("{'items': [{'title': 'Json object is invalid.', 'subtitle': 'Please contact to developper.', 'valid': false}]")
-		} else {
-			fmt.Println(string(j))
-		}
+		wf.WarnEmpty("No matching repository", "Try different query?")
+		wf.SendFeedback()
 		return nil
 	}
 	app.Run(os.Args)
 }
 
-func waitForWorker(wg *sync.WaitGroup, ch chan *model.Item) {
-	wg.Wait()
-	close(ch)
+func main() {
+	wf.Run(run)
 }
 
-func worker(index int, repo string, query string, wg *sync.WaitGroup, ch chan *model.Item) {
-	defer wg.Done()
-	path := strings.Split(repo, "/")
-	if matchRepo(path, query) {
-		// Create normal item
-		item := createNewItem(index, repo, path)
-		ch <- item
+func addNewItem(repo string) {
+	repoPath := strings.Split(repo, "/")
+	it := wf.NewItem(repo).
+		Title(excludeDomain(repoPath, true)).
+		UID(repo).
+		Arg(repo).
+		Subtitle(getDomainName(repoPath)).
+		Icon(getIcon(repoPath)).
+		Valid(true)
+	for _, modKey := range modKeys {
+		mod := createModItem(repoPath, repo, modKey)
+		it.SetModifier(mod)
 	}
-}
-
-func createNewItem(index int, repo string, repo_path []string) *model.Item {
-	item := model.NewItem()
-	item.Uid = string(index)
-	item.Title = excludeDomain(repo_path, true)
-	item.Subtitle = getDomainName(repo_path)
-	item.Arg = repo
-	item.Icon.Type = ""
-	item.Icon.Path = getIconPath(repo_path)
-	createModItems(repo_path, repo, &item.Mods)
-	return item
-}
-
-func createNoResultItem() *model.Item {
-	item := model.NewItem()
-	item.Title = "No result found."
-	item.Subtitle = "Please input again."
-	item.Valid = false
-	return item
-}
-
-func matchRepo(repo_path []string, query string) bool {
-	repo_path_lower, query_lower := strings.ToLower(excludeDomain(repo_path, true)), strings.ToLower(query)
-	if strings.Index(repo_path_lower, query_lower) != -1 {
-		return true
-	}
-	return false
 }
 
 func excludeDomain(repo []string, domain bool) string {
@@ -109,45 +92,43 @@ func getDomainName(repo_path []string) string {
 	return repo_path[len(repo_path)-3]
 }
 
-func createModItems(repo []string, path string, mods *map[string]model.Mod) {
-	for _, key := range model.Modifiers {
-		var (
-			arg string
-			sub string
-		)
-		switch key {
-		case model.Cmd:
-			arg = path
-			sub = "Open '" + path + "' in Finder."
-		case model.Shift:
-			arg = "https://" + excludeDomain(repo, false) + "/"
-			sub = "Open '" + arg + "' in browser."
-		case model.Ctrl:
-			arg = path
-			sub = "Open '" + path + "' in editor."
-		case model.Fn:
-			arg = path
-			sub = "Open '" + path + "' in terminal app."
-		case model.Alt:
-			arg = excludeDomain(repo, true)
-			sub = "Search '" + arg + "' with google."
-		}
-		mod := model.NewMod(arg, sub)
-		(*mods)[key] = *mod
+func createModItem(repo []string, path string, modKey aw.ModKey) *aw.Modifier {
+	var (
+		arg string
+		sub string
+	)
+	switch modKey {
+	case aw.ModCmd:
+		arg = path
+		sub = "Open in Finder."
+	case aw.ModShift:
+		arg = "https://" + excludeDomain(repo, false) + "/"
+		sub = "Open '" + arg + "' in browser."
+	case aw.ModCtrl:
+		arg = path
+		sub = "Open in editor."
+	case aw.ModFn:
+		arg = path
+		sub = "Open in terminal app."
+	case aw.ModOpt:
+		arg = excludeDomain(repo, true)
+		sub = "Search '" + arg + "' with google."
 	}
+	mod := &aw.Modifier{Key: modKey}
+	return mod.
+		Arg(arg).
+		Subtitle(sub).
+		Valid(true)
 }
 
-func getIconPath(repo_path []string) string {
-	var icon_path string
-	domain := getDomainName(repo_path)
-	prefix := "./resources"
+func getIcon(repoPath []string) *aw.Icon {
+	domain := getDomainName(repoPath)
 	switch {
 	case strings.Contains(domain, "github"):
-		icon_path = prefix + "/github-logo.png"
+		return gitHubIcon
 	case strings.Contains(domain, "bitbucket"):
-		icon_path = prefix + "/bitbucket-logo.png"
+		return bitBucketIcon
 	default:
-		icon_path = prefix + "/git-logo.png"
+		return gitIcon
 	}
-	return icon_path
 }

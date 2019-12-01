@@ -1,6 +1,7 @@
 SHELL := /bin/bash
 BIN_NAME := dist/go-ghq-alfred
 WF_NAME := ghq-alfred.alfredworkflow
+ASSETS := $(shell find -f ./resources)
 
 test:
 	go test ./... -v
@@ -10,7 +11,7 @@ $(BIN_NAME): main.go
 
 build: $(BIN_NAME)
 
-$(WF_NAME): build
+$(WF_NAME): $(BIN_NAME) $(ASSETS)
 	if [ ! -d dist ]; then \
 		mkdir dist/; \
 	fi
