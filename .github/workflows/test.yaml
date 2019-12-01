@@ -13,7 +13,6 @@ jobs:
         os:
           - macos-latest
           - macos-10.14
-          - macos-10.13
     steps:
       - name: setup go
         uses: actions/setup-go@v1
