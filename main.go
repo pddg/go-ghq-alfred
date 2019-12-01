@@ -3,11 +3,12 @@ package main
 import (
 	"encoding/json"
 	"fmt"
-	model "github.com/pddg/alfred-models"
-	"github.com/urfave/cli"
 	"os"
 	"strings"
 	"sync"
+
+	model "github.com/pddg/alfred-models"
+	"github.com/urfave/cli"
 )
 
 func main() {

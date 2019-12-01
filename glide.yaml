@@ -1,4 +1,0 @@
-package: github.com/pddg/go-ghq-alfred
-import:
-  - package: github.com/urfave/cli
-  - package: github.com/pddg/alfred-models

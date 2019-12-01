@@ -1,0 +1,4 @@
+github.com/pddg/alfred-models v0.0.0-20170923143305-c0134a499549 h1:i6HmX10+WL5/e29ZDct7gbmIXZayWnmtz2ZqBqy0rKA=
+github.com/pddg/alfred-models v0.0.0-20170923143305-c0134a499549/go.mod h1:rvyKdDBlT8wMwZiJjVBmjqlz+8TvOX8tL3StUSNRoKI=
+github.com/urfave/cli v1.20.1-0.20170911040819-7fb9c86b14e6 h1:FxB2ax1KabQ9P5XJAZHRd6149Q7X+0txg5E+9A1y48U=
+github.com/urfave/cli v1.20.1-0.20170911040819-7fb9c86b14e6/go.mod h1:70zkFmudgCuE/ngEzBv17Jvp/497gISqfk5gWijbERA=

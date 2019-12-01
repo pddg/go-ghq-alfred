@@ -22,5 +22,7 @@ vendor/
 .idea/
 
 # ignore binary
-go-alfred-ghq
+go-ghq-alfred
+*.alfredworkflow
+dist/
 
