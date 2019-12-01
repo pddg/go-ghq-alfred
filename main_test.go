@@ -1,56 +1,97 @@
 package main
 
 import (
+	aw "github.com/deanishe/awgo"
 	"strings"
 	"testing"
 )
 
 const (
-	full_repo_path   = "/hoge/fuga/github.com/user/repo"
-	full_repo_bucket = "/hoge/fuga/bitbucket.org/user/repo"
-	full_repo_other  = "/hoge/fuga/other.git/user/repo"
-	user_repo        = "user/repo"
-	domain_user_repo = "github.com/user/repo"
-	valid_query      = "re"
-	invalid_query    = "aaa"
-	githublogo       = "./resources/github-logo.png"
-	bucketlogo       = "./resources/bitbucket-logo.png"
-	gitlogo          = "./resources/git-logo.png"
+	full_repo_path      = "/hoge/fuga/github.com/user/repo"
+	full_repo_bucket    = "/hoge/fuga/bitbucket.org/user/repo"
+	full_repo_other     = "/hoge/fuga/other.git/user/repo"
+	user_repo           = "user/repo"
+	github_user_repo    = "github.com/user/repo"
+	bitbucket_user_repo = "bitbucket.org/user/repo"
 )
 
 func TestExcludeDomain(t *testing.T) {
-	repo_path := strings.Split(full_repo_path, "/")
-	ur := excludeDomain(repo_path, true)
-	if ur != user_repo {
-		t.Errorf("Did:\texcludeDoamin(%s, '/')\nExpect:\t%s\nResult:\t%s\n", full_repo_path, user_repo, ur)
+	testcases := []struct {
+		path     string
+		expected string
+		domain   bool
+	}{
+		{
+			full_repo_path,
+			user_repo,
+			true,
+		}, {
+			full_repo_path,
+			github_user_repo,
+			false,
+		}, {
+			full_repo_bucket,
+			user_repo,
+			true,
+		}, {
+			full_repo_bucket,
+			bitbucket_user_repo,
+			false,
+		},
 	}
-	dur := excludeDomain(repo_path, false)
-	if dur != domain_user_repo {
-		t.Errorf("Did:\texcludeDoamin(%s, '/')\nExpect:\t%s\nResult:\t%s\n", full_repo_path, domain_user_repo, dur)
+	for _, tc := range testcases {
+		repoPath := strings.Split(tc.path, "/")
+		actual := excludeDomain(repoPath, tc.domain)
+		if actual != tc.expected {
+			t.Errorf("%s is expected, but actual %s\n", tc.expected, actual)
+		}
 	}
 }
 
 func TestGetDomainName(t *testing.T) {
-	repo_path := strings.Split(full_repo_path, "/")
-	if !matchRepo(repo_path, valid_query) {
-		t.Errorf("Could not match '%s' in '%s'. 'Match' is expected, but there is no match.\n", valid_query, full_repo_path)
+	testcases := []struct {
+		path   string
+		domain string
+	}{
+		{
+			full_repo_path,
+			"github.com",
+		}, {
+			full_repo_bucket,
+			"bitbucket.org",
+		}, {
+			full_repo_other,
+			"other.git",
+		},
 	}
-	if matchRepo(repo_path, invalid_query) {
-		t.Errorf("Invalid match with query ('%s') in '%s'. ", invalid_query, full_repo_path)
+	for _, tc := range testcases {
+		repoPath := strings.Split(tc.path, "/")
+		if actual := getDomainName(repoPath); actual != tc.domain {
+			t.Errorf("%s is expected, but actual %s\n", tc.domain, actual)
+		}
 	}
 }
 
 func TestGetIconPath(t *testing.T) {
-	repo_path := strings.Split(full_repo_path, "/")
-	if icon := getIconPath(repo_path); icon != githublogo {
-		t.Errorf("Domain:\tgithub.com\nExpect:\t%s\nResult:\t%s\n", githublogo, icon)
+	testcases := []struct {
+		path string
+		icon *aw.Icon
+	}{
+		{
+			full_repo_path,
+			gitHubIcon,
+		}, {
+			full_repo_bucket,
+			bitBucketIcon,
+		}, {
+			full_repo_other,
+			gitIcon,
+		},
 	}
-	bucket_path := strings.Split(full_repo_bucket, "/")
-	if icon := getIconPath(bucket_path); icon != bucketlogo {
-		t.Errorf("Domain:\tbitbucket.org\nExpect:\t%s\nResult:\t%s\n", bucketlogo, icon)
-	}
-	other_path := strings.Split(full_repo_other, "/")
-	if icon := getIconPath(other_path); icon != gitlogo {
-		t.Errorf("Domain:\tother.git\nExpect:\t%s\nResult:\t%s\n", gitlogo, icon)
+	for _, tc := range testcases {
+		repoPath := strings.Split(tc.path, "/")
+		if icon := getIcon(repoPath); icon != tc.icon {
+			t.Errorf("Expect: %s\nResult: %s\n", tc.icon, icon)
+		}
 	}
 }

@@ -25,4 +25,4 @@ vendor/
 go-ghq-alfred
 *.alfredworkflow
 dist/
-
+testdir/

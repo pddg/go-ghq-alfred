@@ -87,10 +87,14 @@
 			<dict>
 				<key>alfredfiltersresults</key>
 				<false/>
+				<key>alfredfiltersresultsmatchmode</key>
+				<integer>0</integer>
+				<key>argumenttreatemptyqueryasnil</key>
+				<false/>
 				<key>argumenttrimmode</key>
 				<integer>0</integer>
 				<key>argumenttype</key>
-				<integer>0</integer>
+				<integer>1</integer>
 				<key>escaping</key>
 				<integer>102</integer>
 				<key>keyword</key>
@@ -125,7 +129,7 @@
 			<key>uid</key>
 			<string>B12A5118-3473-4B84-933C-D4EDAEA6E76B</string>
 			<key>version</key>
-			<integer>2</integer>
+			<integer>3</integer>
 		</dict>
 		<dict>
 			<key>config</key>
@@ -292,7 +296,7 @@ bitbucket logo
 		<string>/usr/local/bin/ghq</string>
 	</dict>
 	<key>version</key>
-	<string>0.3.1</string>
+	<string>0.4.0</string>
 	<key>webaddress</key>
 	<string>https://www.poyo.info/</string>
 </dict>
